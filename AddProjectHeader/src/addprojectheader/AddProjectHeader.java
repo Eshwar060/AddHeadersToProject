@@ -33,7 +33,7 @@ public class AddProjectHeader
     static File mLogFile = new File(strMainDirPath + "\\log.txt");
 
     public static void main(String[] args) throws IOException {
-        Log("Main Directory \r\n:: " + strMainDirPath + "\\* ::");
+        Log("Main Directory \r\n:: " + strMainDirPath + "\\* ::\r\n");
         ListFiles(strMainDirPath);
         Log("--------------------------------- SUMMARY --");
         Log("Total Directories Iter : \r\n" + strDirItertd);
