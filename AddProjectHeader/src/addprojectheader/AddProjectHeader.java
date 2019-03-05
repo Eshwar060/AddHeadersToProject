@@ -5,9 +5,11 @@
  */
 package addprojectheader;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -16,23 +18,29 @@ import java.io.IOException;
  */
 public class AddProjectHeader 
 {
-
     /**
      * @param args the command line arguments
      */
-    static int FileCount = 0;
-    static int FilesChanged = 0;
+    static long FileCount = 0;
+    static long FilesChanged = 0;
+    static long FilesNtChanged = 0;
     static String strFilesChanged = "";
+    static String strDirItertd = "";
     static String strFilesNtChanged = "";
-    public static void main(String[] args) {
-        String strMainDirPath = "C:\\Users\\Eshwar SIX\\Documents\\NetBeansProjects\\AddProjectHeader\\SampleProject";
-        Log("Main Directory \n:: " + strMainDirPath + "\\* ::");
+    static final String strMainDirPath = "C:\\Users\\Eshwar SIX\\Documents\\NetBeansProjects\\AddProjectHeader\\SampleProject";
+    static int InnerCallCount = 0;
+    
+    static File mLogFile = new File(strMainDirPath + "\\log.txt");
+
+    public static void main(String[] args) throws IOException {
+        Log("Main Directory \r\n:: " + strMainDirPath + "\\* ::");
         ListFiles(strMainDirPath);
-        
+        Log("--------------------------------- SUMMARY --");
+        Log("Total Directories Iter : \r\n" + strDirItertd);
         Log("Total Files Count : " + FileCount);
         Log("Files Changed Count : " + FilesChanged);
-        Log("Files Changed : \n" + strFilesChanged);
-        Log("Files Not Changed : \n" + strFilesNtChanged);
+        Log("Files Changed : \r\n" + strFilesChanged);
+        Log("Files Not Changed : \r\n" + strFilesNtChanged);
     }
     
     public static int ListFiles(String strMainDirPath) 
@@ -46,9 +54,12 @@ public class AddProjectHeader
             {
                 if (file.isDirectory()) 
                 {
-                    Log("DIRECTORY - " + file.getCanonicalPath());
+                    Log(GetTabbedStr(InnerCallCount) + "DIRECTORY - " + file.getCanonicalPath());
+                    ++InnerCallCount;
                     int dwMfdCount = ListFiles(file.getCanonicalPath());
-                    Log("Modified : " + dwMfdCount + "\n");
+                    --InnerCallCount;
+                    Log(GetTabbedStr(InnerCallCount) + "Modified : " + dwMfdCount + "\r\n");
+                    strDirItertd += file.getCanonicalPath() + "\r\n";
                 } 
                 else if(file.isFile())
                 {
@@ -81,14 +92,13 @@ public class AddProjectHeader
                         fos.write(result.getBytes());
                         fos.flush();
                         dwFilesModified++;
-                        FilesChanged++;
-                        strFilesChanged += file.getAbsolutePath() + "\n";
-                        Log("Done.." + file.getAbsoluteFile());
+                        strFilesChanged += file.getAbsolutePath() + "\r\n";
+                        Log(GetTabbedStr(InnerCallCount) + (++FilesChanged) + " Done.." + file.getAbsoluteFile());
                     }
                     else
                     {
-                        Log("Not Done.." + file.getAbsoluteFile());
-                        strFilesNtChanged += file.getAbsolutePath() + "\n";
+                        Log(GetTabbedStr(InnerCallCount)+ "!" + (++FilesNtChanged) + " Not Done.." + file.getAbsoluteFile());
+                        strFilesNtChanged += file.getAbsolutePath() + "\r\n";
                     }
                 }
             }
@@ -99,8 +109,34 @@ public class AddProjectHeader
         return dwFilesModified;
     }
     
-    public static void Log(String strOutputString)
+    public static void Log(String strOutputString) throws IOException
     {
-        System.out.println(strOutputString);
+        System.out.println("\r\n"+strOutputString);
+        if (!mLogFile.exists()) 
+        {
+            mLogFile.createNewFile();
+        }
+        
+        BufferedWriter bw;
+        FileWriter fw;
+        fw = new FileWriter(mLogFile.getAbsoluteFile(), true);
+        bw = new BufferedWriter(fw);
+        bw.write("\r\n"+strOutputString);
+        if (bw != null)
+            bw.close();
+
+        if (fw != null)
+            fw.close();
+    }
+    
+    public static String GetTabbedStr(int dwTabCount)
+    {
+        String strFormattedString = "";
+        while(dwTabCount > 0)
+        {
+            strFormattedString += "\t";
+            dwTabCount--;
+        }
+        return strFormattedString;
     }
 }
